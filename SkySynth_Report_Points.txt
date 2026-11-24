@@ -1,0 +1,29 @@
+SKYSYNTH AI | SEC 302 GENERATIVE AI | UPDATED REPORT POINTERS
+
+1. Problem and objective
+- Drone imagery is difficult to collect under every visibility and lighting condition. SkySynth generates synthetic aerial scenes and creates paired weather variants to explore how visibility changes affect drone perception.
+- The key question is whether weather can be added while keeping cars, roads, and other scene features in place for a controlled comparison.
+
+2. How the project works
+- Stable Diffusion v1.5 generates a 512 x 512 clear aerial image from terrain and altitude prompts. The altitude preset guides the appearance of scale. The project uses pretrained weights.
+- SDEdit partially noises the clear image and denoises it with a weather prompt. It can change lighting and appearance as well as redraw parts of the scene.
+- The controlled fog method adds an image-space haze overlay to the same clear image. It reduces contrast while retaining the positions of vehicles, trees, and lane markings. Fog strength controls the effect. This is an approximation of reduced visibility.
+- The standalone Colab notebook runs generation and evaluation. The Gradio demo provides terrain, weather, altitude, and seed controls with side-by-side previews.
+
+3. Main qualitative result and report figures
+- Use weather_comparison_three_way.png as the main figure. It shows the seed-2024 clear parking lot, SDEdit fog, and the controlled fog overlay. SDEdit changes some vehicle and road details. The overlay retains their positions and visibly reduces contrast.
+- Use skysynth_results_grid.png as a separate seed-42 demo. It shows urban, forest, and desert scenes in clear, foggy, and night presets. Urban Night reads clearly as nighttime. The forest and desert night samples remain brightly lit, showing uneven weather and lighting fidelity across terrains.
+
+4. Updated v3 vehicle detection results
+- Source archive is skysynth_v3_completed_benchmark_1794831305.zip. Cite metrics.csv and settings.json for the results and configuration.
+- Setup used one synthetic parking-lot scene, seed 2024, YOLOv8n, a confidence threshold of 0.25, and controlled fog strength of 0.4. The export records manual baseline confirmation as true.
+- Clear image showed 1 predicted car at mean confidence 0.527. Controlled fog showed 0 predicted cars, with mean confidence N/A because there were no retained car predictions.
+- Suggested report wording. "At a confidence threshold of 0.25, YOLOv8n returned one car prediction on the clear image (confidence 0.527) and zero on the controlled fog version of the same synthetic scene."
+- Many vehicles are visible even in the clear image. The export contains source images and summary metrics. Ground-truth boxes and annotated predictions are needed to verify detection matches and compute recall or precision. Avoid presenting 0.527 as accuracy or generalizing from this single pair to real-world fog.
+- Earlier seed-42 CLIP scores belong to a separate experiment. The completed v3 archive contains no CLIP measurements for the controlled fog overlay.
+
+5. Potential improvements and future uses
+- Annotate the cars once on each clear scene and reuse the boxes on geometry-preserving overlays. Test multiple scenes, seeds, and fog strengths. Match predictions to ground truth with a stated IoU threshold and report precision and recall by condition. This would strengthen the case for traffic-monitoring tests.
+- Test depth or edge conditioning and tune edit strength to improve structure preservation in diffusion edits. Add more realistic fog density and calibrated lighting for night. This could support aerial inspection or road and building segmentation.
+- Test higher native resolution and compare a detector trained on aerial imagery with YOLOv8n. Use a held-out set of labeled real drone images to measure performance on small vehicles.
+- Test augmentation utility by comparing real-only training with real-plus-synthetic training on the same held-out real set. Keep all variants of a base scene in the same split. For new uses such as crop mapping or infrastructure inspection, collect task-specific real images and labels before claiming gains.
